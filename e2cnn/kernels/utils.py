@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-def offset_iterator(base_frequency, N, maximum_offset=None, maximum_frequency=None, non_negative: bool = False):
+def offset_iterator(base_frequency, N, maximum_offset=None, maximum_frequency=None, non_negative: bool = False):  # 偏移量迭代器
     if N < 0:
         # assert maximum_offset == 0
         if maximum_frequency is not None and math.fabs(base_frequency) <= maximum_frequency:
@@ -48,7 +48,7 @@ def offset_iterator(base_frequency, N, maximum_offset=None, maximum_frequency=No
             yield j
 
 
-def psi(theta: Union[np.ndarray, float],
+def psi(theta: Union[np.ndarray, float],  # 旋转 $k * \theta + \gamma$ 矩阵
         k: int = 1,
         gamma: float = 0.,
         out: np.ndarray = None) -> np.ndarray:
@@ -77,7 +77,7 @@ def psi(theta: Union[np.ndarray, float],
     return out
 
 
-def chi(s: int, out: np.ndarray = None) -> np.ndarray:
+def chi(s: int, out: np.ndarray = None) -> np.ndarray:  # 旋转矩阵加上镜像过程
     # the orthonormal matrix associated to the flip
     
     s = -1 * (s > 0) + (s <= 0)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 test(N, b, MF)
     
     #points = np.array([[0., 0.], [0., 1.], [1., 1.], [-1, 0.]]).T
-    points = np.random.randn(2, 50)
+    points = np.random.randn(2, 50)  # 50个点的x，y
     angles = np.arctan2(points[1, :], points[0, :])
     gamma = np.array([0., 0., np.pi / 2])
     k = np.array([1, 2, 4])

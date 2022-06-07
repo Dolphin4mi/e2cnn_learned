@@ -8,47 +8,47 @@ class EmptyBasisException(Exception):
     def __init__(self):
         r"""
         Exception raised when a :class:`~e2cnn.kernels.Basis` with no elements is built.
-        
+
         """
         message = "The Basis you tried to instantiate is empty (dim = 0). You should catch this exception."
         super(EmptyBasisException, self).__init__(message)
 
 
 class Basis(ABC):
-    
+
     def __init__(self, dim: int, shape: Tuple[int, int]):
         r"""
-        
+
         Abstract class for implementing the basis of a space of maps between
         feature spaces (either kernels or PDOs).
-        
+
         .. seealso ::
             :class:`e2cnn.kernels.KernelBasis` and
             :class:`e2cnn.diffops.DiffopBasis`
-        
+
         Args:
             dim (int): the dimensionality of the basis (number of elements)
             shape (tuple): a tuple containing :math:`c_\text{out}` and :math:`c_\text{in}`
-            
+
         Attributes:
             ~.dim (int): the dimensionality of the basis (number of elements)
             ~.shape (tuple): a tuple containing :math:`c_\text{out}` and :math:`c_\text{in}`
-            
+
         """
         assert isinstance(dim, int)
         assert isinstance(shape, tuple) and len(shape) == 2
-        
+
         assert dim >= 0
-        
+
         if dim == 0:
             raise EmptyBasisException()
-        
+
         self.dim = dim
         self.shape = shape
 
     def __len__(self):
         return self.dim
-    
+
     def __iter__(self):
         for i in range(self.dim):
             yield self[i]
@@ -56,39 +56,39 @@ class Basis(ABC):
     @abstractmethod
     def __getitem__(self, idx: int) -> dict:
         pass
-    
+
     @abstractmethod
     def __hash__(self):
         pass
 
 
 class KernelBasis(Basis):
-    
+
     def __init__(self, dim: int, shape: Tuple[int, int]):
         r"""
-        
+
         Abstract class for implementing the basis of a kernel space.
         A kernel space is the space of functions in the form:
-        
+
         .. math::
             \mathcal{K} := \{ \kappa: X \to \mathbb{R}^{c_\text{out} \times c_\text{in}} \}
-        
+
         where :math:`X` is the base space on which the kernel is defined.
         For instance, for planar images :math:`X = \R^2`.
-        
+
         Args:
             dim (int): the dimensionality of the basis :math:`|\mathcal{K}|` (number of elements)
             shape (tuple): a tuple containing :math:`c_\text{out}` and :math:`c_\text{in}`
-            
+
         Attributes:
             ~.dim (int): the dimensionality of the basis :math:`|\mathcal{K}|` (number of elements)
             ~.shape (tuple): a tuple containing :math:`c_\text{out}` and :math:`c_\text{in}`
-            
+
         """
         super().__init__(dim, shape)
 
     @abstractmethod
-    def sample(self, points: np.ndarray, out: np.ndarray = None) -> np.ndarray:
+    def sample(self, points: np.ndarray, out: np.ndarray = None) -> np.ndarray:  # 将连续的核函数采样成离散的核
         r"""
         Sample the continuous basis elements on discrete points in ``points``.
         Optionally, store the resulting multidimentional array in ``out``.
@@ -110,7 +110,7 @@ class KernelBasis(Basis):
         r"""
         Mask the basis sampled through :meth:`~e2cnn.kernels.KernelBasis.sample` to drop some basis elements using the
         input ```mask```.
-        
+
         ```mask``` must be a ```np.uint8``` array of shape ```(len(self), )```.
 
         Args:
@@ -122,69 +122,72 @@ class KernelBasis(Basis):
             the sampled basis
 
         """
-        
+
         assert mask.shape == (self.dim, )
         assert mask.dtype == np.bool
 
         basis = self.sample(points)
-        
+
         if out is not None:
             out[:] = basis[..., mask, :]
         else:
             out = basis[..., mask, :]
-        
+
         return out
 
 
-class GaussianRadialProfile(KernelBasis):
-    
+KERNEL_BASIS = KernelBasis
+
+
+class GaussianRadialProfile(KernelBasis):  # 径向核函数  ->   高斯核
+
     def __init__(self, radii: List[float], sigma: Union[List[float], float]):
         r"""
-        
+
         Basis for kernels defined over a radius in :math:`\R^+_0`.
-        
+
         Each basis element is defined as a Gaussian function.
         Different basis elements are centered at different radii (``rings``) and can possibly be associated with
         different widths (``sigma``).
-        
+
         More precisely, the following basis is implemented:
-        
+
         .. math::
-            
+
             \mathcal{B} = \left\{ b_i (r) :=  \exp \left( \frac{ \left( r - r_i \right)^2}{2 \sigma_i^2} \right) \right\}_i
-        
+
         In order to build a complete basis of kernels, you should combine this basis with a basis which defines the
         angular profile through :class:`~e2cnn.kernels.PolarBasis`.
-        
-        
+
+
         Args:
             radii (list): centers of each basis element. They should be different and spread to cover all
                 domain of interest
             sigma (list or float): widths of each element. Can potentially be different.
-        
-        
+
+
         """
-        
+
         if isinstance(sigma, float):
             sigma = [sigma]*len(radii)
-            
+
         assert len(radii) == len(sigma)
         assert isinstance(radii, list)
-        
+
         for r in radii:
             assert r >= 0.
-        
+
         for s in sigma:
             assert s > 0.
-        
+
         super(GaussianRadialProfile, self).__init__(len(radii), (1, 1))
 
         self.radii = np.array(radii).reshape(1, 1, -1, 1)
         self.sigma = np.array(sigma).reshape(1, 1, -1, 1)
-        
-    def sample(self, radii: np.ndarray, out: np.ndarray = None) -> np.ndarray:
+
+    def sample(self, radii: np.ndarray, out: np.ndarray = None) -> np.ndarray:  # 径向采样方法
         r"""
-        
+
         Sample the continuous basis elements on the discrete set of radii in ``radii``.
         Optionally, store the resulting multidimentional array in ``out``.
 
@@ -200,18 +203,18 @@ class GaussianRadialProfile(KernelBasis):
         """
         assert len(radii.shape) == 2
         assert radii.shape[0] == 1
-    
+
         if out is None:
             out = np.empty((self.shape[0], self.shape[1], self.dim, radii.shape[1]))
-    
+
         assert out.shape == (self.shape[0], self.shape[1], self.dim, radii.shape[1])
-    
+
         radii = radii.reshape(1, 1, 1, -1)
-        
+
         d = (self.radii - radii)**2
-        
+
         out = np.exp(-0.5*d/self.sigma**2, out=out)
-        
+
         return out
 
     def __getitem__(self, r):
@@ -223,39 +226,39 @@ class GaussianRadialProfile(KernelBasis):
             return np.allclose(self.radii, other.radii) and np.allclose(self.sigma, other.sigma)
         else:
             return False
-    
+
     def __hash__(self):
         return hash(self.radii.tobytes()) + hash(self.sigma.tobytes())
-    
 
-class PolarBasis(KernelBasis):
-    
+
+class PolarBasis(KERNEL_BASIS):  # 通过张量积来整合径向和角度核基
+
     def __init__(self, radial: KernelBasis, angular: KernelBasis):
         r"""
-        
+
         Build the tensor product basis of a radial profile basis and an angular profile basis for kernels over the
         plane. Given two bases :math:`A = \{a_i\}_i` and :math:`B = \{b_j\}_j`, this basis is defined as
-        
+
         .. math::
             C = A \otimes B = \left\{ c_{i,j}(x, y) := a_i(r) b_j(\phi) \right\}_{i,j}
-        
-        
+
+
         where :math:`(r, \phi)` is the polar coordinates of the points :math:`(x, y)` on the plane.
-        
+
         Args:
             radial (KernelBasis): the radial basis
             angular (KernelBasis): the angular basis
-        
+
         Attributes:
             ~.radial (KernelBasis): the radial basis
             ~.angular (KernelBasis): the angular basis
-        
+
         """
         super(PolarBasis, self).__init__(radial.dim * angular.dim, (radial.shape[0] * angular.shape[0], radial.shape[1] * angular.shape[1]))
         self.radial = radial
         self.angular = angular
-    
-    def sample(self, points: np.ndarray, out: np.ndarray = None) -> np.ndarray:
+
+    def sample(self, points: np.ndarray, out: np.ndarray = None) -> np.ndarray:  # 在平面上采样，存储为(x,y)的形式，返回在每个采样点上的核基
         r"""
 
         Sample the continuous basis elements on a discrete set of ``points`` on the plane.
@@ -283,38 +286,38 @@ class PolarBasis(KernelBasis):
 
         if out is None:
             out = np.empty((self.shape[0], self.shape[1], self.dim, points.shape[1]))
-    
+
         assert out.shape == (self.shape[0], self.shape[1], self.dim, points.shape[1])
-        
+
         # sample the radial and the angular basis
         o1 = self.radial.sample(radii)
         o2 = self.angular.sample(angles)
-        
+
         m, n, a, p = o1.shape
         q, r, b, p = o2.shape
-        
+
         # build the tensor product
         out = out.reshape((m, q, n, r, a, b, p))
         out = np.einsum("mnap,qrbp->mqnrabp", o1, o2, out=out)
-        
+
         return out.reshape((q*m, n*r, self.dim, p))
-    
+
     def __getitem__(self, idx):
         assert idx < self.dim
         idx1, idx2 = divmod(idx, self.angular.dim)
         attr1 = self.radial[idx1]
         attr2 = self.angular[idx2]
-        
+
         attr = dict()
         # attr.update({"radial_"+k: v for k, v in attr1.items()})
         # attr.update({"angular_"+k: v for k, v in attr2.items()})
         attr.update(attr1)
         attr.update(attr2)
-        
+
         attr["idx"] = idx
         attr["idx1"] = idx1
         attr["idx2"] = idx2
-        
+
         return attr
 
     def __iter__(self):
@@ -336,7 +339,7 @@ class PolarBasis(KernelBasis):
             return self.radial == other.radial and self.angular == other.angular
         else:
             return False
-    
+
     def __hash__(self):
         return hash(self.radial) + hash(self.angular)
 

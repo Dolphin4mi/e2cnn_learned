@@ -106,6 +106,6 @@ class TestRestrictGSpace(TestCase):
 
                 self.assertTrue(np.allclose(y1, y2), msg=f"{space.name} -> {subgroup_id}: {parent(e)} -> {e}")
         
-
-if __name__ == '__main__':
-    unittest.main()
+#
+# if __name__ == '__main__':
+#     unittest.main()

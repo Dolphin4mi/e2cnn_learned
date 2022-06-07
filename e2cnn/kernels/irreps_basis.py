@@ -445,7 +445,13 @@ class R2DiscreteRotationsSolution(IrrepBasis):
         return hash(self.in_irrep) + hash(self.out_irrep) + hash(self.mu.tobytes()) + hash(self.gamma.tobytes())
 
 
-class R2ContinuousRotationsSolution(IrrepBasis):
+class R2ContinuousRotationsSolution(IrrepBasis):   # 二维旋转群的不可约表示
+    '''
+    二维旋转群的不可约表示的交结子空间,function:
+        :math:`\mu = m- n * (-1)^s`
+
+        :math:`\gamma = 0 | \pi/2`
+    '''
     
     def __init__(self,
                  group: Group,
@@ -482,7 +488,7 @@ class R2ContinuousRotationsSolution(IrrepBasis):
             ss = []
             for gamma in [0., np.pi / 2]:
                 for s in [0, 1]:
-                    mu = self.m - self.n * (-1) ** s
+                    mu = self.m - self.n * (-1) ** s  # $m- n * (-1)^s$
                     
                     gammas.append(gamma)
                     mus.append(mu)
@@ -545,7 +551,7 @@ class R2ContinuousRotationsSolution(IrrepBasis):
         self._non_zero_frequencies = self.mu != 0
         self._has_non_zero_frequencies = np.any(self._non_zero_frequencies)
         
-        dim = self.gamma.shape[0]
+        dim = self.gamma.shape[0]   # 基的dim是矩阵元素的数量
         super(R2ContinuousRotationsSolution, self).__init__(group, in_irrep, out_irrep, dim)
     
     def sample(self, angles: np.ndarray, out: np.ndarray = None) -> np.ndarray:
@@ -570,7 +576,7 @@ class R2ContinuousRotationsSolution(IrrepBasis):
         assert angles.shape[0] == 1
         
         if out is None:
-            out = np.empty((self.shape[0], self.shape[1], self.dim, angles.shape[1]))
+            out = np.empty((self.shape[0], self.shape[1], self.dim, angles.shape[1]))  # out_irrep.size  in_irrep.size   gammas列向量的长度  采样点的数量
         
         assert out.shape == (self.shape[0], self.shape[1], self.dim, angles.shape[1])
 

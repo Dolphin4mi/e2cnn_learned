@@ -15,7 +15,7 @@ import numpy as np
 __all__ = ["MultipleModule"]
 
 
-class MultipleModule(EquivariantModule):
+class MultipleModule(EquivariantModule):  # 使用branching模块，分解输入的场类型和张量
     
     def __init__(self,
                  in_type: FieldType,

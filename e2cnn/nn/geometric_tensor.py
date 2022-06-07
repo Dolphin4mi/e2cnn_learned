@@ -170,7 +170,7 @@ class GeometricTensor:
         # FieldType: field type of the signal
         self.type = type
     
-    def restrict(self, id) -> 'GeometricTensor':
+    def restrict(self, id) -> 'GeometricTensor':  # 动态地生成限制表示   静态（预计算）生成方法在 e2cnn.nn.RestrictionModule
         r"""
         Restrict the field type of this tensor.
         
@@ -361,7 +361,9 @@ class GeometricTensor:
 
         """
         rho = torch.FloatTensor(self.type.representation(element))
-        data = torch.einsum("oi,bihw->bohw", (rho, self.tensor.contiguous())).contiguous()
+        # 所谓Einstein约定求和就是略去求和式中的求和号。在此规则中两个相同指标就表示求和，而不管指标是什么字母，有时亦称求和的指标为“哑指标”
+        data = torch.einsum("oi,bihw->bohw", (rho, self.tensor.contiguous())).contiguous()   # 爱因斯坦求和 为了把tensor变成内存上连续的
+        # $D_{bohw} = \sum_{i} \rho_{oi} \times F_{bihw}$
         return GeometricTensor(data, self.type)
     
     @property

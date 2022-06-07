@@ -82,7 +82,7 @@ class DisentangleModule(EquivariantModule):
         
         input = input.tensor
         
-        b, c, w, h = input.shape
+        b, c, w, h = input.shape  # batch channel width height
         
         output = torch.empty_like(input)
         

@@ -117,7 +117,7 @@ class GeneralOnR2(GSpace):
         if (in_repr.name, out_repr.name) not in self._fields_intertwiners_basis_memory[key]:
             # TODO - we could use a flag in the args to choose whether to store it or not
             
-            basis = self._basis_generator(in_repr, out_repr, rings, sigma, **kwargs)
+            basis = self._basis_generator(in_repr, out_repr, rings, sigma, **kwargs)  # cunstruct the radial and angular basis by tensor product
        
             # store the basis in the dictionary
             self._fields_intertwiners_basis_memory[key][(in_repr.name, out_repr.name)] = basis
@@ -190,7 +190,7 @@ class GeneralOnR2(GSpace):
         if (in_repr.name, out_repr.name) not in self._fields_intertwiners_basis_memory[key]:
             # TODO - we could use a flag in the args to choose whether to store it or not
             
-            basis = self._diffop_basis_generator(in_repr, out_repr, max_power, discretization, **kwargs)
+            basis = self._diffop_basis_generator(in_repr, out_repr, max_power, **kwargs)
        
             # store the basis in the dictionary
             self._fields_intertwiners_basis_memory[key][(in_repr.name, out_repr.name)] = basis

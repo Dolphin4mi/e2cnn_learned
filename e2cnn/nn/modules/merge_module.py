@@ -11,7 +11,7 @@ from typing import List, Tuple, Any, Union, Dict
 __all__ = ["MergeModule"]
 
 
-class MergeModule(EquivariantModule):
+class MergeModule(EquivariantModule):  # 把等变模块集合起来
     
     def __init__(self,
                  modules: List[Tuple[EquivariantModule, Union[str, List[str]]]],

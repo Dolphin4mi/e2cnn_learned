@@ -1,6 +1,8 @@
 import unittest
 from unittest import TestCase
+import os
 
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 from e2cnn.group import CyclicGroup
 from e2cnn.group import DihedralGroup
 
@@ -8,37 +10,46 @@ import numpy as np
 import scipy.sparse as sparse
 
 
+# class TestComputeRegularRepresentations():
 class TestComputeRegularRepresentations(TestCase):
-    
+
     def test_dihedral_rr_odd(self):
+        print('dg = DihedralGroup(9)')
         dg = DihedralGroup(9)
         self.dihedral_rr_eval(dg, dg.representations['regular'])
     
     def test_dihedral_rr_even(self):
+        print('dg = DihedralGroup(10)')
         dg = DihedralGroup(10)
         self.dihedral_rr_eval(dg, dg.representations['regular'])
     
     def test_dihedral_rr_large(self):
+        print('dg = DihedralGroup(16)')
         dg = DihedralGroup(16)
         self.dihedral_rr_eval(dg, dg.representations['regular'])
 
     def test_dihedral_rr_small(self):
+        print('dg = DihedralGroup(2)')
         dg = DihedralGroup(2)
         self.dihedral_rr_eval(dg, dg.representations['regular'])
 
     def test_cyclic_rr_odd(self):
+        print('cg = CyclicGroup(11)')
         cg = CyclicGroup(11)
         self.cyclic_rr_eval(cg, cg.representations['regular'])
 
     def test_cyclic_rr_even(self):
+        print('cg = CyclicGroup(10)')
         cg = CyclicGroup(10)
         self.cyclic_rr_eval(cg, cg.representations['regular'])
 
     def test_cyclic_rr_large(self):
+        print('cg = CyclicGroup(20)')
         cg = CyclicGroup(20)
         self.cyclic_rr_eval(cg, cg.representations['regular'])
 
     def test_cyclic_rr_small(self):
+        print('cg = CyclicGroup(2)')
         cg = CyclicGroup(2)
         self.cyclic_rr_eval(cg, cg.representations['regular'])
 
@@ -122,4 +133,7 @@ class TestComputeRegularRepresentations(TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest('test_dihedral_rr_even')
+    unittest.main(defaultTest='suite')

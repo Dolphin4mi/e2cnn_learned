@@ -1,3 +1,4 @@
+import os
 
 from torch.nn.functional import conv2d, pad
 
@@ -160,7 +161,7 @@ class R2Conv(EquivariantModule):
         
         self.kernel_size = kernel_size
         self.stride = stride
-        self.dilation = dilation
+        self.dilation = dilation  # 空洞卷积
         self.padding = padding
         self.padding_mode = padding_mode
         self.groups = groups
@@ -177,7 +178,7 @@ class R2Conv(EquivariantModule):
             raise ValueError("padding_mode must be one of [{}], but got padding_mode='{}'".format(padding_modes, padding_mode))
         self._reversed_padding_repeated_twice = tuple(x for x in reversed(_padding) for _ in range(2))
         
-        if groups > 1:
+        if groups > 1:   # 将输入输出类型分组
             # Check the input and output classes can be split in `groups` groups, all equal to each other
             # first, check that the number of fields is divisible by `groups`
             assert len(in_type) % groups == 0
@@ -196,7 +197,7 @@ class R2Conv(EquivariantModule):
             # different filters, each mapping an input group to an output group.
             in_type = in_type.index_select(list(range(in_size)))
         
-        if bias:
+        if bias:  # 在输出特征上，如果有trivial表示，则增加偏置项
             # bias can be applied only to trivial irreps inside the representation
             # to apply bias to a field we learn a bias for each trivial irreps it contains
             # and, then, we transform it with the change of basis matrix to be able to apply it to the whole field
@@ -218,8 +219,8 @@ class R2Conv(EquivariantModule):
                 # to a bias for the whole field more efficiently
                 bias_expansion = torch.zeros(self.out_type.size, trivials)
                 
-                p, c = 0, 0
-                for r in self.out_type:
+                p, c = 0, 0  # c记录有几个通道需要bias，p记录输出通道的位置
+                for r in self.out_type:  # 在输出特征上
                     pi = 0
                     for irr in r.irreps:
                         irr = self.out_type.fibergroup.irreps[irr]
@@ -239,7 +240,7 @@ class R2Conv(EquivariantModule):
             self.bias = None
             self.expanded_bias = None
 
-        grid, basis_filter, rings, sigma, maximum_frequency = compute_basis_params(kernel_size,
+        grid, basis_filter, rings, sigma, maximum_frequency = compute_basis_params(kernel_size,  # 构造离散基的参数
                                                                                    frequencies_cutoff,
                                                                                    rings,
                                                                                    sigma,
@@ -420,8 +421,8 @@ class R2Conv(EquivariantModule):
         import matplotlib.image as mpimg
         from skimage.measure import block_reduce
         from skimage.transform import resize
-        
-        x = mpimg.imread('../group/testimage.jpeg').transpose((2, 0, 1))[np.newaxis, 0:c, :, :]
+        os.listdir()
+        x = mpimg.imread('./test/group/testimage.jpeg').transpose((2, 0, 1))[np.newaxis, 0:c, :, :]
         
         x = resize(
             x,

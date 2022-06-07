@@ -148,7 +148,7 @@ class SingleBlockBasisExpansion(BasisExpansion):
 _stored_filters = {}
 
 
-def block_basisexpansion(basis: Basis,
+def block_basisexpansion(basis: Basis,   # 单个块的基扩张方法
                          points: np.ndarray,
                          basis_filter: Callable[[dict], bool] = None,
                          recompute: bool = False

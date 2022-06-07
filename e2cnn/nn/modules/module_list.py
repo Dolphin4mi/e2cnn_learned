@@ -15,7 +15,7 @@ from typing import List, Iterable
 __all__ = ["ModuleList"]
 
 
-class ModuleList(torch.nn.ModuleList):
+class ModuleList(torch.nn.ModuleList):   # 把等变模块分解成list
     
     def __init__(self,
                  modules: Iterable[EquivariantModule] = None,

@@ -86,7 +86,7 @@ class EquivariantModule(Module, ABC):
         This method can be overwritten for custom tests.
         
         Returns:
-            a list containing containing for each testing element a pair with that element and the corresponding
+            a list containing for each testing element a pair with that element and the corresponding
             equivariance error
         
         """

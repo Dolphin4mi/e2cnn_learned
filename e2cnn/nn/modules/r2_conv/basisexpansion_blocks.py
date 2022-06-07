@@ -72,9 +72,9 @@ class BlocksBasisExpansion(BasisExpansion):
             for o_repr in out_type._unique_representations:
                 reprs_names = (i_repr.name, o_repr.name)
                 try:
-                    basis = basis_generator(i_repr, o_repr, **kwargs)
+                    basis = basis_generator(i_repr, o_repr, **kwargs)  # 构造角度和径向基
                     
-                    block_expansion = block_basisexpansion(basis, points, basis_filter, recompute=recompute)
+                    block_expansion = block_basisexpansion(basis, points, basis_filter, recompute=recompute)   # 块的基扩张
                     _block_expansion_modules[reprs_names] = block_expansion
                     
                     # register the block expansion as a submodule

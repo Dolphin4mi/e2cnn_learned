@@ -16,7 +16,7 @@ import torch
 __all__ = ["FieldType"]
 
 
-class FieldType:
+class FieldType:  # 特征场类型
     
     def __init__(self,
                  gspace: GSpace,
@@ -294,7 +294,7 @@ class FieldType:
     
         return self.index_select(permutation)
 
-    def __add__(self, other: 'FieldType') -> 'FieldType':
+    def __add__(self, other: 'FieldType') -> 'FieldType':  # :math:`\rho = \rho_1 \oplus \rho_2` directsum
         r"""
 
         Returns a field type associate with the *direct sum* :math:`\rho = \rho_1 \oplus \rho_2` of the representations

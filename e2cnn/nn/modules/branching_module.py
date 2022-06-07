@@ -19,7 +19,7 @@ import numpy as np
 __all__ = ["BranchingModule"]
 
 
-class BranchingModule(EquivariantModule):
+class BranchingModule(EquivariantModule):  # 等变模块根据label[trivial_repr,regular_repr,...]分解成好几个分支，
     
     def __init__(self,
                  in_type: FieldType,
